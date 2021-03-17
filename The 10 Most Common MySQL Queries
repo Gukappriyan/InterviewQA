@@ -1,0 +1,100 @@
+1. Create Table
+You would not use the create table query every time the script executes in normal scenarios. However, when you start building an application, you need to create database tables. To do so with a primary key, you can use the following query.
+
+CREATE TABLE  'emp' (
+  'id' INTEGER UNSIGNED NOT NULL AUTO_INCREMENT,
+  'name' VARCHAR(45) NOT NULL,
+  'lastname' VARCHAR(45),
+  'dept' VARCHAR(45) DEFAULT 'sales',
+  PRIMARY KEY ('id')
+)
+ENGINE = InnoDB;
+The above query creates a table "emp" in the selected database. We will have an "id" column as auto increment and with a PRIMARY KEY constraint, which ensures an incremented integer value is added every time a new row is inserted; the constraint checks for non-duplicate value. The column "dept" is populated by default values ("sales" if no value is supplied). You can specify the "Engine" to be used while creating the table. Otherwise, the default engine will be used. We used "InnoDB" here because it allows FOREIGN KEY and transactions.
+
+2. Insert Query
+Now that you have a table in your database, let us see how you can insert values into that table. You might have used insert query many times, but have you used an insert query that not only inserts data but can also updates data if need be? This is achieved by using the keyword "on DUPLICATE KEY." Here is an example:
+
+Simple insert query
+insert into emp (name,lastname,dept) values('new name','new last name','Accounts');
+Insert and Update query
+insert into emp (id,name,lastname,dept) values('key that already exists', 'new name','new last name','Accounts') 
+on duplicate KEY UPDATE  name='default name', lastname='default last name';
+In the above query, if the value of "id" passed already exists, then we can update the value of the row instead of inserting a new row. This is more useful when you need to check columns other than auto-incremented ones.
+
+3. JOINS
+Joins are supposed to be complicated because there is so much variety in them. Joins are known by different names in different databases: self join, outer join, inner join, natural join, and so many others. We will use a join between two tables, which is generally used to pull data.
+
+Let us assume we have another table called "departments", which has a list of all the departments. If you want to pull employee data including departments, the query would be:
+
+Regular Join
+select emp.name,department.name from emp join department on emp.dept = department.name
+Left Join
+select emp.name,department.name from emp left join department on emp.dept = department.name
+Right Join
+select emp.name,department.name from emp right join department on emp.dept = department.name
+The regular join will get all the records that match the condition in both tables. The left join will match records that match the condition as above, but it will also get all the unmatched records from the left table. On the other hand, the right join will get all the unmatched records from the right table.
+
+4. Create and Drop Constraints
+Often times you need to edit/add/delete constraints applied on a table. You can do so using the following queries:
+
+Add a primary key:
+ALTER TABLE 'TABLE_NAME'  DROP PRIMARY KEY, ADD PRIMARY KEY ('COLUMN_NAME');
+Drop a Primary key:
+ALTER TABLE 'TABLE_NAME'  DROP PRIMARY KEY;
+While adding a primary key, we first drop the already added keys and then add the key to a new column. Otherwise it won't allow you to add the key.
+
+5. Order By, Having Clauses
+Order by is used to arrange data by a specific column and then having is used to filter that result set. These are really useful when you need some specific information from a large database.
+
+Select * from TABLE_NAME group_by dept  having salary > 10000;
+In the above query the result set would contain data organized by departments and those who have salaries greater than $10,000. It's worth noting that when we use the "having" clause without "order by" it works more like the "where" clause.
+
+6. Adding Indexing and Search Queries
+Creating indexes for a column undoubtedly increases incoming queries to the database, and indexes are created on a column basis. For example, in our sample table "emp", if most of the queries fetch data using the column id, then it would be a wise decision to create an index for the id column.
+
+Upon creating indexes, MySQL will first search for ID in the created index and if none is found it will run the query on the table level. So, that speeds up the process if indexes are created wisely.
+
+To create an Index, the following query is used.
+
+Create index at time of creating table
+CREATE TABLE  'emp' (
+Name varchar(45),
+  'id' INT, INDEX(ID)
+) 
+Create Index for an existing table
+Create Index id_index on emp(ID);
+7. Aggregate Function Queries
+Aggregate functions are used to perform mathematical operations on the data retrieved from the database. These types of functions include sum, count, etc. For example, if you want to calculate the number of employees working in a particular department, then you can do so with the help of an aggregate function as follows:
+
+select distinct name,count(dept) as cnt from emp group by dept  order by cnt DESC;
+The above query will return the name of the employee and count in the department, and it is then arranged in descending order of the count returned.
+
+7. Alter and Update Columns of a Table
+Tables are created and then edited quite often. In the following few lines we will see how to add/change columns of an existing table.
+
+Add a column
+Alter table 'emp' add column salary varchar(45); 
+Edit a column
+Salary should be in integer instead of having varchar, so let's change its datatype to int. Note that there may be loss of data if there is a compatibility issue.
+
+Alter table 'emp' modify column salary int(10); 
+Rename a column
+Alter table 'emp' change salary salary2 varchar(45);
+Drop a column
+Alter table 'emp' drop column salary;
+8. Create a New Table with Non-Duplicate Values
+Suppose you have thousands of records in your database table and when you started it the data wasn't entered correctly and contains repetitions. Now you plan to clean up all the junk and create a new table. Let's see how we do it.
+
+create table 'emp2' as select * from emp where 1 group by 'lastname';
+So it will create a new table "emp2" with only the employees having unique "last names". You can sort your table with a different approach.
+
+9. Creating Dump of Your Database and Optimizing the Table
+There may be times when your application needs to schedule backups and send them over email or keep them somewhere safe. You can write a script to do so and set a cron for the same thing. That will save a lot of work with backing up your work and avoid running into some unanticipated trouble. Let's see how you can create a backup of your database as well as optimize the table.
+
+mysqldump –h localhost –u username –ppassword databasename > backup_file.sql
+This will create a sql dump file, which can be then imported again to restore the database at some level.
+
+10. Optimizing a Table
+It's pretty straightforward to optimize a table in MySQL, as the name indicates:
+
+Optimize table TABLE_NAME
